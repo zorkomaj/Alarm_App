@@ -1,0 +1,2 @@
+Za list vseh lokacij uporabiva LazyColumn ker ne preloada stvari v pomnilnik
+Lokacije bi lahko hranila v datoteki ali pa tist data class ka smo ga omenil
