@@ -1,4 +1,4 @@
-package com.example.alarm_app.pages
+package com.example.alarm_app.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
