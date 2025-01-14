@@ -1,5 +1,6 @@
 package com.example.alarm_app.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.background
@@ -29,10 +30,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import com.example.alarm_app.data.AlarmWithLocation
 import com.example.alarm_app.data.DatabaseModule
 import com.example.alarm_app.data.MapData
 import com.example.alarm_app.data.alarmList
@@ -47,31 +53,59 @@ data class AlarmList(val name: String, val location: String,
                         val checked: Boolean)
 
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun AlarmsScreen(context: Context, modifier: Modifier = Modifier) {
     val openAddAlarmDialog = remember { mutableStateOf(false) }
 
+    val allAlarmsList = remember { mutableStateOf(emptyList<AlarmWithLocation>()) }
+
+
+    val db = DatabaseModule.getDatabase(context)
+
+    GlobalScope.launch(Dispatchers.Default) {
+        allAlarmsList.value = db.alarmDataDao().getAllAlarmData()
+        //Log.d("korutina", allAlarmsList.value.toString())
+    }
+
+
     //Button(onClick = {}) { }
     Box(modifier = modifier.fillMaxSize(),
         ) {
-        LazyColumn(
-            modifier = modifier.fillMaxSize(),
-            //verticalArrangement = Arrangement.Center,
-            //horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            items(alarmList) { currentAlarm ->
-                Alarm(
-                    name = currentAlarm.name,
-                    location = currentAlarm.location,
-                    radius = currentAlarm.radius,
-                    repetitions = currentAlarm.repetitions,
-                    checked = currentAlarm.checked,
-                )
-                //Spacer(modifier = Modifier.height(5.dp))
+        when {
+            allAlarmsList.value.isNotEmpty() -> {
+                LazyColumn(
+                    modifier = modifier.fillMaxSize(),
+                ) {
+                    items(allAlarmsList.value) { currentAlarm ->
+                        Alarm(
+                            name = currentAlarm.alarmName,
+                            location = currentAlarm.locationName,
+                            checked = currentAlarm.checked,
+                        )
+                        //Spacer(modifier = Modifier.height(5.dp))
+                    }
+                }
             }
-
         }
 
+//        LazyColumn(
+//            modifier = modifier.fillMaxSize(),
+//            //verticalArrangement = Arrangement.Center,
+//            //horizontalAlignment = Alignment.CenterHorizontally,
+//        ) {
+//            items(alarmList) { currentAlarm ->
+//                Alarm(
+//                    name = currentAlarm.name,
+//                    location = currentAlarm.location,
+//                    radius = currentAlarm.radius,
+//                    repetitions = currentAlarm.repetitions,
+//                    checked = currentAlarm.checked,
+//                )
+//                //Spacer(modifier = Modifier.height(5.dp))
+//            }
+//
+//        }
 
         Button(onClick = {
             openAddAlarmDialog.value = !openAddAlarmDialog.value}, modifier =
@@ -81,6 +115,20 @@ fun AlarmsScreen(context: Context, modifier: Modifier = Modifier) {
             .width(70.dp)
             .height(70.dp)) {
             Text(text = "+", fontSize = 30.sp, textAlign = TextAlign.Center)
+
+        }
+
+        Button(onClick = {
+            val db = DatabaseModule.getDatabase(context)
+            GlobalScope.launch(Dispatchers.Default) { allAlarmsList.value = db.alarmDataDao().getAllAlarmData() }
+            }, modifier =
+        Modifier
+            .align(Alignment.BottomStart)
+            .padding(20.dp, 0.dp, 0.dp, 140.dp)
+            .width(70.dp)
+            .height(70.dp)) {
+            //Text(text = "+", fontSize = 30.sp, textAlign = TextAlign.Center)
+            Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
 
         }
 
@@ -104,10 +152,8 @@ fun AlarmsScreen(context: Context, modifier: Modifier = Modifier) {
 fun Alarm(modifier: Modifier = Modifier,
           name: String,
           location: String,
-          radius: Int,
-          repetitions: String,
           checked: Boolean) {
-    var checked by remember { mutableStateOf(true) }
+    var checked by remember { mutableStateOf(checked) }
 
     Row (
         Modifier
@@ -121,13 +167,11 @@ fun Alarm(modifier: Modifier = Modifier,
             Modifier.padding(10.dp)
 
         ) {
-            Text(text = name, fontWeight = FontWeight.Bold, fontSize = 30.sp)
-            Text(text = location, fontSize = 20.sp)
-            Text(text = "$radius m", fontSize = 20.sp)
-            Text(text = repetitions, fontSize = 20.sp)
+            Text(text = name, fontWeight = FontWeight.Bold, fontSize = 30.sp, modifier = Modifier.padding(start = 10.dp))
+            Text(text = location, fontSize = 20.sp, modifier = Modifier.padding(start = 10.dp))
         }
         Switch(
-            modifier = Modifier.padding(start = 50.dp),
+            modifier = Modifier.padding(start = 150.dp),
             checked = checked,
             onCheckedChange = {
                 checked = it
