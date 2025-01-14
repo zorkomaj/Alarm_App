@@ -6,4 +6,13 @@ val alarmList: List<AlarmList> = listOf( //fake history data
     AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
     AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
     AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
+    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
+    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
+    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
+    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
+    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
+    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
+    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
+    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
+    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
 )

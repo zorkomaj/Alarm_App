@@ -62,7 +62,7 @@ fun MainScreen(modifier: Modifier = Modifier, context: Context) {
 @Composable
 fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, context: Context) {
     when (selectedIndex) {
-        0 -> AlarmsScreen()
+        0 -> AlarmsScreen(context = context)
         1 -> MapScreen(context = context)
         2 -> SettingsScreen()
     }
