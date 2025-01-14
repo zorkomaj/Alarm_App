@@ -32,3 +32,4 @@ secrets.properties
 
 # Android Profiling
 *.hprof
+secrets.properties
