@@ -160,7 +160,8 @@ fun Alarm(modifier: Modifier = Modifier,
             .padding(20.dp, 20.dp, 20.dp, 0.dp)
             .background(color = Color(0xd1d1d1ff), shape = RoundedCornerShape(20.dp))
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
 
     ) {
         Column (
@@ -171,7 +172,7 @@ fun Alarm(modifier: Modifier = Modifier,
             Text(text = location, fontSize = 20.sp, modifier = Modifier.padding(start = 10.dp))
         }
         Switch(
-            modifier = Modifier.padding(start = 150.dp),
+            modifier = Modifier.padding(end = 10.dp),
             checked = checked,
             onCheckedChange = {
                 checked = it
