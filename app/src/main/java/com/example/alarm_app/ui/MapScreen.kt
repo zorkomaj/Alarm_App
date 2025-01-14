@@ -30,7 +30,7 @@ fun MapScreen(modifier: Modifier = Modifier, context: Context) {
     var geofenceLatLng by remember { mutableStateOf(LatLng(46.060574607585295, 14.512268608273097)) } // Default location
     var geofenceRadius by remember { mutableStateOf(100f) }
     var radiusInput by remember { mutableStateOf(TextFieldValue(geofenceRadius.toInt().toString())) }
-    var alarmName by remember { mutableStateOf(TextFieldValue("")) }
+    var locationName by remember { mutableStateOf(TextFieldValue("")) }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(geofenceLatLng, 15f)
@@ -81,9 +81,9 @@ fun MapScreen(modifier: Modifier = Modifier, context: Context) {
                 .padding(bottom = 140.dp)
         ) {
             TextField(
-                value = alarmName,
+                value = locationName,
                 onValueChange = {
-                    alarmName = it
+                    locationName = it
                 },
                 label = { Text("Enter Alarm Name") },
                 singleLine = true,
@@ -94,8 +94,8 @@ fun MapScreen(modifier: Modifier = Modifier, context: Context) {
 
             Button(
                 onClick = {
-                    saveCoordinatesToDatabase(context, geofenceLatLng, geofenceRadius, alarmName.text)
-                    Log.d("GeofenceDebug", "Saved: AlarmName=${alarmName.text}, Lat=${geofenceLatLng.latitude}, Lng=${geofenceLatLng.longitude}, Radius=$geofenceRadius")
+                    saveCoordinatesToDatabase(context, geofenceLatLng, geofenceRadius, locationName.text)
+                    Log.d("GeofenceDebug", "Saved: AlarmName=${locationName.text}, Lat=${geofenceLatLng.latitude}, Lng=${geofenceLatLng.longitude}, Radius=$geofenceRadius")
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -140,10 +140,10 @@ fun createGeofence(
         }
 }
 
-fun saveCoordinatesToDatabase(context: Context, latLng: LatLng, radius: Float, alarmName: String) {
+fun saveCoordinatesToDatabase(context: Context, latLng: LatLng, radius: Float, locationName: String) {
     val db = DatabaseModule.getDatabase(context)
     val mapData = MapData(
-        alarmName = alarmName,
+        locationName = locationName,
         latitude = latLng.latitude,
         longitude = latLng.longitude,
         radius = radius

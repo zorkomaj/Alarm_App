@@ -13,9 +13,12 @@ object DatabaseModule {
                 context.applicationContext,
                 AppDatabase::class.java,
                 "map_data_database"
-            ).build()
+            )
+                .fallbackToDestructiveMigration()
+                .build()
             INSTANCE = instance
             instance
         }
     }
 }
+
