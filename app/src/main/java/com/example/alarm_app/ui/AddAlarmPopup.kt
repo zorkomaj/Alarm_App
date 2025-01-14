@@ -49,9 +49,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import com.example.alarm_app.data.AlarmData
 import com.example.alarm_app.data.DatabaseModule
 import com.example.alarm_app.data.MapData
 import com.example.alarm_app.data.MapDataDao
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -71,14 +73,12 @@ fun AddAlarmDialog(
     var alarmName by rememberSaveable { mutableStateOf("") }
 
     val allLocationsList = remember { mutableStateOf(emptyList<MapData>()) }
-    var allLocationsRefresh by remember { mutableIntStateOf(0) }
 
 
     val db = DatabaseModule.getDatabase(context)
 
     GlobalScope.launch(Dispatchers.Default) {
         allLocationsList.value = db.mapDataDao().getAllMapData()
-        allLocationsRefresh++
         Log.d("korutina", allLocationsList.value.toString())
     }
 
@@ -103,25 +103,6 @@ fun AddAlarmDialog(
                     .height(30.dp))
 
 
-//                if (allLocationsList.value.isEmpty()) {
-//                    Log.d("ifelse", "if")
-//                    DropdownList(listOf("Data loading"),
-//                        dropdownSelectedIndex,
-//                        modifier = Modifier,
-//                        onItemClick = {dropdownSelectedIndex = it})
-//                }
-//                else {
-//                    var locationNamesList = mutableListOf<String>()
-//                    for (item in allLocationsList.value) {
-//                        locationNamesList += item.locationName
-//                    }
-//
-//                    Log.d("ifelse", "else")
-//                    DropdownList(locationNamesList,
-//                        dropdownSelectedIndex,
-//                        modifier = Modifier,
-//                        onItemClick = {dropdownSelectedIndex = it})
-//                }
                 when {
                     allLocationsList.value.isNotEmpty() -> {
                         var locationNamesList = mutableListOf<String>()
@@ -156,7 +137,11 @@ fun AddAlarmDialog(
                     TextButton(
                         onClick = { Log.d("InformationRecived",
                             dropdownSelectedIndex.toString() + ", " + alarmName)
-                            onConfirmation() },
+                            saveAlarmToDatabase(context, alarmName,
+                                allLocationsList.value[dropdownSelectedIndex]
+                            )
+                            onConfirmation()
+                                  },
                         modifier = Modifier.padding(8.dp),
                     ) {
                         Text("Confirm")
@@ -166,6 +151,21 @@ fun AddAlarmDialog(
         }
     }
 }
+
+fun saveAlarmToDatabase(context: Context, name: String, mapData: MapData) {
+    val db = DatabaseModule.getDatabase(context)
+    val alarmData = AlarmData(
+        alarmName = name,
+        mapDataId = mapData.id,
+        checked = true
+    )
+
+    CoroutineScope(Dispatchers.IO).launch {
+        db.alarmDataDao().insertAlarmData(alarmData)
+        Log.d("AlarmAddDebug", "Saved to database: $alarmData")
+    }
+}
+
 
 suspend fun getMapData(context: Context): List<MapData> {
     val db = DatabaseModule.getDatabase(context)
