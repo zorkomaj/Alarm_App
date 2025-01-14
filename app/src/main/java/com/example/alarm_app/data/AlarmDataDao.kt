@@ -15,6 +15,13 @@ interface AlarmDataDao {
         INNER JOIN map_data ON alarm_data.mapDataId = map_data.id
     """)
     suspend fun getAllAlarmData(): List<AlarmWithLocation>
+
+    @Query("""
+    SELECT map_data.* FROM alarm_data
+    INNER JOIN map_data ON alarm_data.mapDataId = map_data.id
+    WHERE alarm_data.checked = 1
+""")
+    suspend fun getCheckedGeofences(): List<MapData>
 }
 
 data class AlarmWithLocation(

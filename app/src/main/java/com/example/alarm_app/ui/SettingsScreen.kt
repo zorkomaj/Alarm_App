@@ -1,88 +1,68 @@
 package com.example.alarm_app.ui
 
-import androidx.compose.foundation.background
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.io.File
+import java.io.FileOutputStream
 
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier) {
-    val settingsList = listOf("Setting 1", "Setting 2", "Setting 3")
-    val checkedStates = remember { mutableStateListOf(true, true, true) }
+fun SettingsScreen(modifier: Modifier = Modifier, context: Context) {
+    var uploadStatus by remember { mutableStateOf("") }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(settingsList) { setting ->
-                val index = settingsList.indexOf(setting)
-                SettingRow(
-                    settingName = setting,
-                    checked = checkedStates[index],
-                    onCheckedChange = {
-                        checkedStates[index] = it
-                    }
-                )
-            }
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            val success = saveFileAsAlarmSound(context, uri)
+            uploadStatus = if (success) "Alarm sound updated successfully!" else "Failed to update alarm sound."
+        } else {
+            uploadStatus = "No file selected."
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = 40.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(onClick = { filePickerLauncher.launch("audio/*") }) {
+            Text("Upload Alarm Sound", fontSize = 18.sp)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Button(
-                onClick = {  },
-                modifier = Modifier.padding(end = 8.dp)
-            ) {
-                Text("Import")
-            }
-            Button(
-                onClick = {  },
-                modifier = Modifier.padding(start = 8.dp)
-            ) {
-                Text("Export")
-            }
-        }
+        Text(text = uploadStatus, fontSize = 16.sp)
     }
 }
 
-@Composable
-fun SettingRow(settingName: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .padding(16.dp, 16.dp, 16.dp, 16.dp)
-            .background(Color(0xd1d1d1ff), shape = RoundedCornerShape(20.dp))
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = settingName,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
+private fun saveFileAsAlarmSound(context: Context, uri: Uri): Boolean {
+    return try {
+        val alarmsoundFile = File(context.filesDir, "alarmsound.mp3")
+
+        if (alarmsoundFile.exists()) {
+            alarmsoundFile.delete()
         }
 
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            modifier = Modifier.padding(start = 50.dp)
-        )
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return false
+        FileOutputStream(alarmsoundFile).use { outputStream ->
+            inputStream.copyTo(outputStream)
+        }
+
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
     }
 }

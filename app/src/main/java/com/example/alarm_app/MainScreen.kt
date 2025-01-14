@@ -64,6 +64,6 @@ fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, context: Co
     when (selectedIndex) {
         0 -> AlarmsScreen(context = context)
         1 -> MapScreen(context = context)
-        2 -> SettingsScreen()
+        2 -> SettingsScreen(context = context)
     }
 }

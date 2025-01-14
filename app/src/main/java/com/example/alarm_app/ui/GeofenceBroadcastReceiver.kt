@@ -3,26 +3,38 @@ package com.example.alarm_app.ui
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import android.util.Log
-import com.google.android.gms.location.Geofence
-import com.google.android.gms.location.GeofencingEvent
+import android.widget.Toast
+import com.example.alarm_app.R
+import java.io.File
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent) {
-        val geofencingEvent = GeofencingEvent.fromIntent(intent)
-        if (geofencingEvent != null) {
-            if (geofencingEvent.hasError()) {
-                Log.e("Geofence", "Error: ${geofencingEvent.errorCode}")
-                return
-            }
-        }
+    private var mediaPlayer: MediaPlayer? = null
 
-        val geofenceTransition = geofencingEvent?.geofenceTransition
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-            Log.d("Geofence", "Entered geofence")
-        } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-            Log.d("Geofence", "Exited geofence")
+    override fun onReceive(context: Context, intent: Intent) {
+        playAlarmSound(context)
+    }
+
+    private fun playAlarmSound(context: Context) {
+        val alarmsoundFile = File(context.filesDir, "alarmsound.mp3")
+
+        if (alarmsoundFile.exists()) {
+            try {
+                mediaPlayer?.stop()
+                mediaPlayer?.release()
+                mediaPlayer = MediaPlayer().apply {
+                    setDataSource(alarmsoundFile.absolutePath)
+                    prepare()
+                    start()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            mediaPlayer = MediaPlayer.create(context, R.raw.alarmsound)
+            mediaPlayer?.start()
         }
     }
 }
-
