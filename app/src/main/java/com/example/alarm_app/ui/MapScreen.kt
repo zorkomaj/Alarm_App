@@ -13,10 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.example.alarm_app.data.DatabaseModule
+import com.example.alarm_app.data.MapData
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun MapScreen(modifier: Modifier = Modifier, context: Context) {
@@ -24,8 +29,8 @@ fun MapScreen(modifier: Modifier = Modifier, context: Context) {
 
     var geofenceLatLng by remember { mutableStateOf(LatLng(46.060574607585295, 14.512268608273097)) } // Default location
     var geofenceRadius by remember { mutableStateOf(100f) }
-
     var radiusInput by remember { mutableStateOf(TextFieldValue(geofenceRadius.toInt().toString())) }
+    var alarmName by remember { mutableStateOf(TextFieldValue("")) }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(geofenceLatLng, 15f)
@@ -70,16 +75,32 @@ fun MapScreen(modifier: Modifier = Modifier, context: Context) {
             )
         }
 
-        Button(
-            onClick = {
-                saveCoordinates(context, geofenceLatLng, geofenceRadius)
-                Log.d("GeofenceDebug", "Saved Coordinates: Lat=${geofenceLatLng.latitude}, Lng=${geofenceLatLng.longitude}, Radius=$geofenceRadius")
-            },
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(0.dp, 0.dp, 20.dp, 140.dp)
+                .padding(bottom = 140.dp)
         ) {
-            Text("Save Coordinates")
+            TextField(
+                value = alarmName,
+                onValueChange = {
+                    alarmName = it
+                },
+                label = { Text("Enter Alarm Name") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = {
+                    saveCoordinatesToDatabase(context, geofenceLatLng, geofenceRadius, alarmName.text)
+                    Log.d("GeofenceDebug", "Saved: AlarmName=${alarmName.text}, Lat=${geofenceLatLng.latitude}, Lng=${geofenceLatLng.longitude}, Radius=$geofenceRadius")
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Save Coordinates")
+            }
         }
     }
 }
@@ -119,13 +140,17 @@ fun createGeofence(
         }
 }
 
-fun saveCoordinates(context: Context, latLng: LatLng, radius: Float) {
-    val sharedPreferences = context.getSharedPreferences("GeofenceLocation", Context.MODE_PRIVATE)
-    with(sharedPreferences.edit()) {
-        putString("latitude", latLng.latitude.toString())
-        putString("longitude", latLng.longitude.toString())
-        putFloat("radius", radius)
-        apply()
+fun saveCoordinatesToDatabase(context: Context, latLng: LatLng, radius: Float, alarmName: String) {
+    val db = DatabaseModule.getDatabase(context)
+    val mapData = MapData(
+        alarmName = alarmName,
+        latitude = latLng.latitude,
+        longitude = latLng.longitude,
+        radius = radius
+    )
+
+    CoroutineScope(Dispatchers.IO).launch {
+        db.mapDataDao().insertMapData(mapData)
+        Log.d("GeofenceDebug", "Saved to database: $mapData")
     }
-    Log.d("GeofenceDebug", "Coordinates: Lat=${latLng.latitude}, Lng=${latLng.longitude}, Radius=$radius")
 }
