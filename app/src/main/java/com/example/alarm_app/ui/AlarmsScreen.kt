@@ -25,22 +25,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import com.example.alarm_app.data.alarmList
 
 data class AlarmList(val name: String, val location: String,
                         val radius: Int, val repetitions: String,
                         val checked: Boolean)
 
-val alarmList: List<AlarmList> = listOf( //fake history data
-    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
-    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
-    AlarmList("Jutro 1", "Ljubljana Slovenija Avto", 200, "Every Day", true),
-)
-
 
 @Composable
 fun AlarmsScreen(modifier: Modifier = Modifier) {
+    //Button(onClick = {}) { }
     LazyColumn (
         modifier = modifier.fillMaxSize(),
         //verticalArrangement = Arrangement.Center,
