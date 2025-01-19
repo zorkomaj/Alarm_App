@@ -9,8 +9,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import com.example.alarm_app.data.DatabaseModule
 import com.example.alarm_app.ui.MapScreen
 import com.example.alarm_app.ui.theme.Alarm_AppTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -79,11 +84,28 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         Log.d("MainActivityLifecycle", "onStart called")
+
+        val db = DatabaseModule.getDatabase(this@MainActivity)
+        GlobalScope.launch(Dispatchers.Default) {
+            val savedGeofences = db.alarmDataDao().getCheckedGeofences()
+
+            savedGeofences.forEach { geofence ->
+                Log.d("GeofenceDebug", "Loaded Geofence: ${geofence.locationName}, Lat: ${geofence.latitude}, Lng: ${geofence.longitude}, Radius: ${geofence.radius}")
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         Log.d("MainActivityLifecycle", "onResume called")
+
+        val db = DatabaseModule.getDatabase(this@MainActivity)
+
+        GlobalScope.launch(Dispatchers.Default) {
+            var allAlarmsList = db.alarmDataDao().getAllAlarmData()
+
+            Log.d("SavedAlarms", allAlarmsList.toString())
+        }
     }
 
     override fun onPause() {
